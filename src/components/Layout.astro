@@ -1,0 +1,73 @@
+---
+import Transition from "./Transition.astro";
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props as Props;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body data-barba="wrapper">
+    <main data-barba="container" data-barba-namespace={title}>
+      <slot />
+    </main>
+    <Transition />
+  </body>
+</html>
+
+<script>
+  import barba from "@barba/core";
+  import gsap from "gsap";
+
+  const transitionedElement = document.querySelector(".transition");
+  const transitionCells = document.querySelectorAll(".transition__cell");
+
+  const enterTl = gsap.timeline();
+  const exitTl = gsap.timeline();
+
+  barba.init({
+    transitions: [
+      {
+        name: "fade",
+        // @ts-expect-error - barba types are wrong
+        leave(data) {
+          return exitTl
+            .to(transitionedElement, {
+              display: "grid",
+            })
+            .to(transitionCells, {
+              // duration: 0.01,
+              opacity: 1,
+              stagger: 0.005,
+            })
+            .to(data.current.container, {
+              display: "none",
+              duration: 0,
+            });
+        },
+        // @ts-expect-error - barba types are wrong
+        enter() {
+          return enterTl
+            .to(transitionCells, {
+              // duration: 0.01,
+              opacity: 0,
+              stagger: 0.005,
+            })
+            .to(transitionedElement, {
+              display: "none",
+              duration: 0,
+            });
+        },
+      },
+    ],
+  });
+</script>
